@@ -11,7 +11,7 @@ export function Navigation() {
   const navItems = [
     { href: "/courses", label: "Courses", icon: Book },
     { href: "/simulations", label: "Simulations", icon: BarChart3 },
-    { href: "/dashboard", label: "Dashboard", icon: Settings },
+    { href: "/app", label: "Launch App", icon: Settings, highlight: true },
   ];
 
   return (
@@ -40,7 +40,11 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center space-x-1 text-slate-300 hover:text-electric-400 transition-colors font-medium"
+                  className={`flex items-center space-x-1 transition-colors font-medium ${
+                    item.highlight 
+                      ? "text-electric-400 hover:text-electric-300" 
+                      : "text-slate-300 hover:text-electric-400"
+                  }`}
                 >
                   <IconComponent className="h-4 w-4" />
                   <span>{item.label}</span>
