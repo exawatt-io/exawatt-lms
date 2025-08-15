@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -185,9 +186,11 @@ export default function AppSimulationsPage() {
                 15-30 min
               </div>
             </div>
-            <Button variant="secondary" size="lg" icon={Play} href="/app/simulations/market-clearing">
-              Launch Simulation
-            </Button>
+            <Link href="/app/simulations/market-clearing">
+              <Button variant="secondary" size="lg" icon={Play}>
+                Launch Simulation
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -298,15 +301,26 @@ export default function AppSimulationsPage() {
                     </div>
                   )}
                   
-                  <Button
-                    variant={isLocked ? "ghost" : "primary"}
-                    size="sm"
-                    icon={isLocked ? Lock : Play}
-                    disabled={isLocked}
-                    href={isLocked ? undefined : `/app/simulations/${simulation.id}`}
-                  >
-                    {isLocked ? 'Locked' : 'Launch'}
-                  </Button>
+                  {isLocked ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={Lock}
+                      disabled={true}
+                    >
+                      Locked
+                    </Button>
+                  ) : (
+                    <Link href={`/app/simulations/${simulation.id}`}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={Play}
+                      >
+                        Launch
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             );

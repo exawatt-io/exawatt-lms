@@ -1,116 +1,139 @@
-import Link from "next/link";
-import { BarChart3, Zap, TrendingUp, Settings, Play } from "lucide-react";
-import { Section, SectionHeader } from "@/components/ui/Section";
-import { FeatureCard } from "@/components/ui/FeatureCard";
-import { FeatureIcon } from "@/components/ui/FeatureIcon";
-import { Button } from "@/components/ui/Button";
-import { SimulationCard } from "@/components/ui/SimulationCard";
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { Play, BarChart3, Zap, Users, ArrowRight } from 'lucide-react';
 
-const simulations = [
-  {
-    id: "market-clearing",
-    title: "Market Clearing Engine",
-    description: "Simulate the intersection of supply and demand curves to determine market-clearing prices and quantities.",
-    icon: BarChart3,
-    difficulty: "Beginner",
-    duration: "15-30 min",
-    color: "from-blue-500 to-cyan-500",
-    features: ["Supply/demand curves", "Price discovery", "Market equilibrium"]
-  },
-  {
-    id: "dispatch-optimization",
-    title: "Economic Dispatch",
-    description: "Optimize power generation dispatch considering transmission constraints and generator characteristics.",
-    icon: Zap,
-    difficulty: "Intermediate",
-    duration: "20-45 min",
-    color: "from-green-500 to-emerald-500",
-    features: ["Generator merit order", "Transmission limits", "Cost optimization"]
-  },
-  {
-    id: "lmp-formation",
-    title: "LMP Price Formation",
-    description: "Understand how Locational Marginal Prices form with energy, congestion, and loss components.",
-    icon: TrendingUp,
-    difficulty: "Advanced",
-    duration: "30-60 min",
-    color: "from-purple-500 to-violet-500",
-    features: ["Energy component", "Congestion pricing", "Loss factors"]
-  }
-];
+export default function SimulationsMarketingPage() {
+  const simulations = [
+    {
+      id: 'market-clearing',
+      title: 'Market Clearing Simulation',
+      description: 'Experience real-time electricity market operations with bid submission, demand forecasting, and price formation.',
+      features: ['Real-time market data', 'Interactive bidding', 'LMP calculation', 'Grid visualization'],
+      difficulty: 'Intermediate',
+      users: '5,200+'
+    },
+    {
+      id: 'grid-operations',
+      title: 'Grid Operations Center',
+      description: 'Manage grid stability, dispatch generation, and handle emergency scenarios in this comprehensive operations simulation.',
+      features: ['Live grid monitoring', 'Emergency response', 'Load balancing', 'Contingency analysis'],
+      difficulty: 'Advanced',
+      users: '3,100+'
+    },
+    {
+      id: 'trading-floor',
+      title: 'Energy Trading Floor',
+      description: 'Master energy trading strategies with portfolio management, risk assessment, and market analysis tools.',
+      features: ['Portfolio tracking', 'Risk metrics', 'Market analysis', 'Strategy backtesting'],
+      difficulty: 'Expert',
+      users: '1,800+'
+    }
+  ];
 
-export default function SimulationsPage() {
   return (
-    <div className="min-h-screen">
-      <Section>
+    <div className="min-h-screen py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <SectionHeader 
-          title="Market Simulations"
-          description="Gain hands-on experience with interactive simulations that model real electricity market operations. Learn by doing with our industry-standard tools."
-        />
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Interactive{' '}
+            <span className="bg-gradient-to-r from-electric-400 to-power-400 bg-clip-text text-transparent">
+              Market Simulations
+            </span>
+          </h1>
+          <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-8">
+            Practice electricity market operations, grid management, and trading strategies in risk-free, realistic simulations.
+          </p>
+          <Link href="/app/simulations">
+            <Button variant="primary" size="lg" icon={Play}>
+              Launch Simulations
+            </Button>
+          </Link>
+        </div>
 
-        {/* Featured Simulation */}
-        <FeatureCard variant="highlight" size="lg" className="bg-gradient-to-r from-electric-600 to-power-500 text-white mb-16">
-          <div className="max-w-4xl">
-            <h2 className="text-2xl font-bold mb-4">
-              Try Our Most Popular Simulation
-            </h2>
-            <p className="text-slate-200 mb-6 text-lg">
-              Start with our Market Clearing Engine to understand how electricity prices are set through supply and demand dynamics.
-            </p>
-            <Link href="/simulations/market-clearing">
-              <Button variant="secondary" size="lg" icon={Play}>
-                Launch Simulation
-              </Button>
-            </Link>
-          </div>
-        </FeatureCard>
-
-        {/* Simulation Grid */}
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
+        {/* Simulations Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {simulations.map((simulation) => (
-            <SimulationCard key={simulation.id} {...simulation} />
+            <div key={simulation.id} className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden hover:border-electric-500/50 transition-all duration-300">
+              <div className="h-48 bg-gradient-to-br from-power-500/20 to-electric-500/20 flex items-center justify-center">
+                <BarChart3 className="h-16 w-16 text-power-400" />
+              </div>
+              
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-1 text-xs font-medium bg-power-500/20 text-power-400 rounded-full">
+                    {simulation.difficulty}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <Users className="h-3 w-3" />
+                    {simulation.users}
+                  </div>
+                </div>
+                
+                <h3 className="text-xl font-semibold text-white mb-3">{simulation.title}</h3>
+                <p className="text-slate-300 mb-4">{simulation.description}</p>
+                
+                <div className="space-y-2 mb-4">
+                  <p className="text-sm font-medium text-slate-200">Key Features:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {simulation.features.map((feature, index) => (
+                      <span key={index} className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                
+                <Link href={`/app/simulations/${simulation.id}`}>
+                  <Button variant="outline" size="sm" className="w-full" icon={Play}>
+                    Try Simulation
+                  </Button>
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Learning Approach */}
-        <FeatureCard size="lg">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              How Our Simulations Work
-            </h2>
-            <p className="text-slate-300 max-w-2xl mx-auto">
-              Our simulations are designed to bridge the gap between theoretical knowledge and practical application
-            </p>
+        {/* Features Section */}
+        <div className="mt-20 grid md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-electric-500 to-electric-600 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Real-Time Data</h3>
+            <p className="text-slate-300">Experience live market conditions with real electricity market data feeds.</p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <FeatureIcon icon={Settings} variant="electric" className="mx-auto mb-4" />
-              <h3 className="font-semibold text-white mb-2">Interactive Parameters</h3>
-              <p className="text-slate-300 text-sm">
-                Adjust market conditions, generator parameters, and demand patterns in real-time
-              </p>
+          
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-power-500 to-power-600 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="h-8 w-8 text-white" />
             </div>
-
-            <div className="text-center">
-              <FeatureIcon icon={BarChart3} variant="power" className="mx-auto mb-4" />
-              <h3 className="font-semibold text-white mb-2">Real-Time Results</h3>
-              <p className="text-slate-300 text-sm">
-                See immediate impacts of your changes with dynamic charts and visualizations
-              </p>
-            </div>
-
-            <div className="text-center">
-              <FeatureIcon icon={TrendingUp} variant="mixed" className="mx-auto mb-4" />
-              <h3 className="font-semibold text-white mb-2">Learning Insights</h3>
-              <p className="text-slate-300 text-sm">
-                Get AI-powered explanations and insights about market behavior and outcomes
-              </p>
-            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Advanced Analytics</h3>
+            <p className="text-slate-300">Deep insights with comprehensive analytics and performance metrics.</p>
           </div>
-        </FeatureCard>
-      </Section>
+          
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-electric-500 to-power-500 w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Collaborative Learning</h3>
+            <p className="text-slate-300">Compete and collaborate with professionals from around the world.</p>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16 py-16 border-t border-slate-700">
+          <h2 className="text-3xl font-bold text-white mb-4">Ready to Experience the Market?</h2>
+          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            Start with our beginner-friendly simulations and progress to advanced trading scenarios.
+          </p>
+          <Link href="/app/simulations">
+            <Button variant="primary" size="lg" icon={ArrowRight}>
+              Start Simulating
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

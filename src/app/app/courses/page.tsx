@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { AppLayout } from '@/components/app/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -252,17 +253,21 @@ export default function AppCoursesPage() {
                           </div>
                         ) : isEnrolled ? (
                           <div className="space-y-2">
-                            <Button variant="primary" size="sm" icon={ArrowRight} href={`/app/courses/${course.id}`}>
-                              Continue
-                            </Button>
+                            <Link href={`/app/courses/${course.id}`}>
+                              <Button variant="primary" size="sm" icon={ArrowRight}>
+                                Continue
+                              </Button>
+                            </Link>
                             <div className="text-xs text-slate-400">
                               Next: {course.nextLesson}
                             </div>
                           </div>
                         ) : (
-                          <Button variant="outline" size="sm" icon={getStatusIcon(course.status)} href={`/app/courses/${course.id}`}>
-                            Enroll
-                          </Button>
+                          <Link href={`/app/courses/${course.id}`}>
+                            <Button variant="outline" size="sm" icon={getStatusIcon(course.status)}>
+                              Enroll
+                            </Button>
+                          </Link>
                         )}
                       </div>
                     </div>

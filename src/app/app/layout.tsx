@@ -1,11 +1,10 @@
-export default function AppRootLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-950 overflow-hidden">
-      {/* App has its own complete layout - no main navigation needed */}
+    <div className="h-screen overflow-hidden bg-slate-950">
       {children}
     </div>
   );
