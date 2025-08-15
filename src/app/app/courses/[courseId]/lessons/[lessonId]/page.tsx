@@ -1,87 +1,10 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, BookOpen, Clock } from 'lucide-react';
-
-const lessonData = {
-  '1': {
-    title: 'Introduction to Electrical Power Systems',
-    duration: '25 min',
-    courseId: 'grid-fundamentals',
-    courseName: 'Grid Fundamentals',
-    nextLesson: '2',
-    prevLesson: null,
-  }
-};
-
-const sampleContent = {
-  title: "Introduction to Electrical Power Systems",
-  content: `Welcome to your first lesson in Grid Fundamentals! In this lesson, we'll explore the basic concepts of electrical power systems and how they form the backbone of our modern economy.
-
-## Learning Objectives
-
-By the end of this lesson, you will understand:
-
-- The basic components of electrical power systems
-- How electricity flows from generation to consumption
-- The role of the electrical grid in society
-- Key terminology used in power systems
-
-## What is an Electrical Power System?
-
-An electrical power system is a network of electrical components used to supply, transmit, and use electric power. The power system consists of three main components:
-
-### 1. Generation
-Power plants convert various forms of energy into electrical energy. Common generation sources include:
-
-- **Thermal Power Plants**: Coal, natural gas, nuclear
-- **Renewable Sources**: Solar, wind, hydro, geothermal
-- **Energy Storage**: Batteries, pumped hydro, compressed air
-
-### 2. Transmission
-High-voltage transmission lines carry electricity over long distances from power plants to distribution substations. This network operates at voltages typically between 115 kV and 765 kV.
-
-### 3. Distribution
-Lower-voltage distribution systems deliver electricity from substations to end users like homes, businesses, and factories. Distribution voltages typically range from 4 kV to 35 kV.
-
-## The Role of the Grid
-
-The electrical grid serves several critical functions:
-
-- **Reliability**: Ensures continuous power supply even when individual components fail
-- **Efficiency**: Optimizes power flow to minimize losses and costs
-- **Flexibility**: Accommodates varying demand and generation patterns
-- **Integration**: Connects diverse generation sources and load centers
-
-## Key Terms
-
-**Load**: The amount of electrical power being consumed at any given time
-
-**Baseload**: The minimum level of demand on the electrical grid over 24 hours
-
-**Peak Load**: The maximum electrical demand during a specific period
-
-**Grid Frequency**: The rate at which alternating current oscillates (60 Hz in North America)
-
-**Power Factor**: The ratio of real power to apparent power in an AC circuit
-
-## Real-World Example
-
-Consider the path electricity takes from a natural gas power plant to your home:
-
-1. **Generation**: Natural gas burns in a turbine, spinning a generator that produces electricity at 25 kV
-2. **Step-up Transformation**: Voltage is increased to 345 kV for efficient long-distance transmission
-3. **Transmission**: High-voltage lines carry power hundreds of miles to your city
-4. **Step-down Transformation**: Voltage is reduced to 12 kV at a distribution substation
-5. **Distribution**: Local distribution lines carry power through neighborhoods
-6. **Final Transformation**: A transformer on your street reduces voltage to 120/240V for your home
-
-## Review Questions
-
-1. What are the three main components of an electrical power system?
-2. Why is electricity transmitted at high voltages over long distances?
-3. What is the difference between baseload and peak load?
-4. Name three types of renewable energy sources commonly used for electricity generation.`
-};
+import { ArrowLeft, ArrowRight, BookOpen, Clock, CheckCircle, Play } from 'lucide-react';
+import { getLessonBySlug, getCourseBySlug } from '@/sanity/lib/fetch';
+import { PortableText } from '@portabletext/react';
+import { Button } from '@/components/ui/Button';
+import { AppLayout } from '@/components/app/AppLayout';
 
 interface LessonPageProps {
   params: Promise<{ 
@@ -90,117 +13,217 @@ interface LessonPageProps {
   }>;
 }
 
+// Portable Text components for rendering rich content
+const portableTextComponents = {
+  block: {
+    h2: ({children}: any) => <h2 className="text-2xl font-semibold text-white mb-4 mt-8">{children}</h2>,
+    h3: ({children}: any) => <h3 className="text-xl font-semibold text-slate-200 mb-3 mt-6">{children}</h3>,
+    h4: ({children}: any) => <h4 className="text-lg font-semibold text-slate-200 mb-2 mt-4">{children}</h4>,
+    normal: ({children}: any) => <p className="text-slate-300 mb-4 leading-relaxed">{children}</p>,
+    blockquote: ({children}: any) => (
+      <blockquote className="border-l-4 border-electric-500 pl-4 py-2 my-4 bg-slate-800/50 rounded-r">
+        {children}
+      </blockquote>
+    ),
+  },
+  marks: {
+    strong: ({children}: any) => <strong className="text-white font-semibold">{children}</strong>,
+    em: ({children}: any) => <em className="text-electric-300 italic">{children}</em>,
+    code: ({children}: any) => (
+      <code className="bg-slate-800 text-electric-300 px-2 py-1 rounded text-sm font-mono">
+        {children}
+      </code>
+    ),
+  },
+  types: {
+    image: ({value}: any) => (
+      <div className="my-6">
+        <img 
+          src={value.asset.url} 
+          alt={value.alt || ''} 
+          className="rounded-lg w-full"
+        />
+        {value.caption && (
+          <p className="text-sm text-slate-400 mt-2 text-center italic">{value.caption}</p>
+        )}
+      </div>
+    ),
+    codeBlock: ({value}: any) => (
+      <div className="my-6">
+        <pre className="bg-slate-900 border border-slate-700 rounded-lg p-4 overflow-x-auto">
+          <code className={`language-${value.language} text-sm`}>
+            {value.code}
+          </code>
+        </pre>
+      </div>
+    ),
+    callout: ({value}: any) => {
+      const typeStyles = {
+        info: 'border-blue-500 bg-blue-500/10 text-blue-300',
+        warning: 'border-yellow-500 bg-yellow-500/10 text-yellow-300',
+        success: 'border-green-500 bg-green-500/10 text-green-300',
+        error: 'border-red-500 bg-red-500/10 text-red-300',
+      };
+      
+      return (
+        <div className={`border-l-4 p-4 my-4 rounded-r ${typeStyles[value.type as keyof typeof typeStyles]}`}>
+          <p className="text-sm">{value.content}</p>
+        </div>
+      );
+    },
+  },
+};
+
 export default async function LessonPage({ params }: LessonPageProps) {
   const { courseId, lessonId } = await params;
-  const lesson = lessonData[lessonId as keyof typeof lessonData];
+  
+  // Fetch lesson and course data from Sanity
+  const [lesson, course] = await Promise.all([
+    getLessonBySlug(lessonId),
+    getCourseBySlug(courseId)
+  ]);
 
-  if (!lesson || lesson.courseId !== courseId) {
+  if (!lesson || !course || lesson.course?._id !== course._id) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-16 z-40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link
-                href={`/courses/${courseId}`}
-                className="flex items-center space-x-2 text-slate-600 hover:text-slate-900"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">{lesson.courseName}</span>
-              </Link>
-              <div className="text-slate-400">/</div>
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-4 w-4 text-primary-600" />
-                <span className="font-medium text-slate-900">Lesson {lessonId}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2 text-sm text-slate-600">
-              <Clock className="h-4 w-4" />
-              <span>{lesson.duration}</span>
-            </div>
+    <AppLayout
+      title={`Lesson ${lesson.orderIndex}: ${lesson.title}`}
+      subtitle={course.title}
+      headerActions={
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/app/courses/${courseId}`}
+            className="flex items-center space-x-2 text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Course</span>
+          </Link>
+          <div className="flex items-center space-x-2 text-sm text-slate-400">
+            <Clock className="h-4 w-4" />
+            <span>{lesson.estimatedDuration} min</span>
           </div>
         </div>
-      </div>
+      }
+    >
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Lesson Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-4">{lesson.title}</h1>
+          {lesson.description && (
+            <p className="text-lg text-slate-300 leading-relaxed">{lesson.description}</p>
+          )}
+        </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Learning Objectives */}
+        {lesson.learningObjectives && lesson.learningObjectives.length > 0 && (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-electric-400" />
+              Learning Objectives
+            </h2>
+            <ul className="space-y-2">
+              {lesson.learningObjectives.map((objective, index) => (
+                <li key={index} className="flex items-start gap-2 text-slate-300">
+                  <div className="w-1.5 h-1.5 bg-electric-400 rounded-full mt-2 flex-shrink-0" />
+                  {objective}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Lesson Content */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-8 lg:p-12">
-            <h1 className="text-4xl font-bold text-slate-900 mb-8">{sampleContent.title}</h1>
-            <div className="prose prose-slate prose-lg max-w-none">
-              {sampleContent.content.split('\n').map((line, index) => {
-                if (line.startsWith('## ')) {
-                  return <h2 key={index} className="text-3xl font-semibold text-slate-800 mb-4 mt-8">{line.replace('## ', '')}</h2>;
-                } else if (line.startsWith('### ')) {
-                  return <h3 key={index} className="text-2xl font-semibold text-slate-700 mb-3 mt-6">{line.replace('### ', '')}</h3>;
-                } else if (line.startsWith('- ')) {
-                  return <li key={index} className="text-slate-600 mb-2">{line.replace('- ', '')}</li>;
-                } else if (line.startsWith('**') && line.endsWith('**')) {
-                  const text = line.replace(/\*\*/g, '');
-                  const [term, definition] = text.split(': ');
-                  return (
-                    <p key={index} className="text-slate-600 mb-4">
-                      <strong className="text-slate-800">{term}:</strong> {definition}
-                    </p>
-                  );
-                } else if (line.match(/^\d+\./)) {
-                  return <li key={index} className="text-slate-600 mb-2 list-decimal">{line.replace(/^\d+\.\s/, '')}</li>;
-                } else if (line.trim() === '') {
-                  return <br key={index} />;
-                } else {
-                  return <p key={index} className="text-slate-600 mb-4 leading-relaxed">{line}</p>;
-                }
-              })}
-            </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 mb-8">
+          <div className="prose prose-slate prose-lg max-w-none">
+            {lesson.content && (
+              <PortableText 
+                value={lesson.content} 
+                components={portableTextComponents}
+              />
+            )}
           </div>
         </div>
+
+        {/* Key Terms */}
+        {lesson.keyTerms && lesson.keyTerms.length > 0 && (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Key Terms</h2>
+            <div className="grid gap-4">
+              {lesson.keyTerms.map((term, index) => (
+                <div key={index} className="border-l-4 border-electric-500 pl-4">
+                  <h3 className="font-semibold text-electric-300 mb-1">{term.term}</h3>
+                  <p className="text-slate-300 text-sm">{term.definition}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Simulation Link */}
+        {lesson.hasSimulation && lesson.simulationReference && (
+          <div className="bg-gradient-to-r from-electric-600 to-power-500 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-semibold mb-2">Practice with Simulation</h3>
+                <p className="text-electric-100 mb-4">{lesson.simulationReference.description}</p>
+              </div>
+              <Link href={`/app/simulations/${lesson.simulationReference.slug.current}`}>
+                <Button variant="secondary" icon={Play}>
+                  Launch Simulation
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            {lesson.prevLesson && (
-              <Link
-                href={`/courses/${courseId}/lessons/${lesson.prevLesson}`}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Previous Lesson</span>
+            {lesson.previousLesson && (
+              <Link href={`/app/courses/${courseId}/lessons/${lesson.previousLesson.slug.current}`}>
+                <Button variant="outline" icon={ArrowLeft}>
+                  Previous: {lesson.previousLesson.title}
+                </Button>
               </Link>
             )}
           </div>
           
           <div>
             {lesson.nextLesson && (
-              <Link
-                href={`/courses/${courseId}/lessons/${lesson.nextLesson}`}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-energy-500 to-primary-600 text-white rounded-lg hover:shadow-lg transition-all duration-200"
-              >
-                <span>Next Lesson</span>
-                <ArrowRight className="h-4 w-4" />
+              <Link href={`/app/courses/${courseId}/lessons/${lesson.nextLesson.slug.current}`}>
+                <Button variant="primary" icon={ArrowRight}>
+                  Next: {lesson.nextLesson.title}
+                </Button>
               </Link>
             )}
           </div>
         </div>
 
         {/* Progress */}
-        <div className="mt-8 bg-white rounded-lg border border-slate-200 p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-700">Course Progress</span>
-            <span className="text-sm text-slate-600">Lesson {lessonId} of 12</span>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-slate-200">Course Progress</span>
+            <span className="text-sm text-slate-400">
+              Lesson {lesson.orderIndex} of {course.lessons?.length || 0}
+            </span>
           </div>
-          <div className="w-full bg-slate-200 rounded-full h-2">
+          <div className="w-full bg-slate-700 rounded-full h-3">
             <div 
-              className="bg-gradient-to-r from-energy-500 to-primary-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(parseInt(lessonId) / 12) * 100}%` }}
-            ></div>
+              className="bg-gradient-to-r from-electric-500 to-power-400 h-3 rounded-full transition-all duration-500"
+              style={{ 
+                width: `${course.lessons ? (lesson.orderIndex / course.lessons.length) * 100 : 0}%` 
+              }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-slate-400 mt-2">
+            <span>Started</span>
+            <span>{Math.round(course.lessons ? (lesson.orderIndex / course.lessons.length) * 100 : 0)}% Complete</span>
+            <span>Finished</span>
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

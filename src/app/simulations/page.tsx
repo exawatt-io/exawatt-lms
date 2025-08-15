@@ -1,9 +1,21 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Play, BarChart3, Zap, Users, ArrowRight } from 'lucide-react';
+import { getFeaturedSimulations } from '@/sanity/lib/fetch';
+import { getDifficultyColor } from '@/sanity/lib/fetch';
 
-export default function SimulationsMarketingPage() {
-  const simulations = [
+export default async function SimulationsMarketingPage() {
+  const featuredSimulations = await getFeaturedSimulations();
+  
+  // If no featured simulations from Sanity, fall back to hardcoded examples
+  const simulations = featuredSimulations.length > 0 ? featuredSimulations.map(sim => ({
+    id: sim.slug.current,
+    title: sim.title,
+    description: sim.description,
+    features: sim.features.slice(0, 4),
+    difficulty: sim.difficulty,
+    users: `${(sim.userCount / 1000).toFixed(1)}k+`
+  })) : [
     {
       id: 'market-clearing',
       title: 'Market Clearing Simulation',
@@ -61,7 +73,7 @@ export default function SimulationsMarketingPage() {
               
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="px-2 py-1 text-xs font-medium bg-power-500/20 text-power-400 rounded-full">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDifficultyColor(simulation.difficulty)}`}>
                     {simulation.difficulty}
                   </span>
                   <div className="flex items-center gap-1 text-xs text-slate-400">

@@ -1,260 +1,312 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Play, Clock, Users, BarChart3, CheckCircle } from 'lucide-react';
-
-const courseData = {
-  'grid-fundamentals': {
-    title: 'Grid Fundamentals',
-    description: 'Understanding the basics of electrical grids, power generation, transmission, and distribution systems.',
-    duration: '4 weeks',
-    students: 1250,
-    difficulty: 'Beginner',
-    lessons: [
-      {
-        id: 1,
-        title: 'Introduction to Electrical Power Systems',
-        description: 'Basic concepts of electricity generation, transmission, and distribution.',
-        duration: '25 min',
-        type: 'lesson'
-      },
-      {
-        id: 2,
-        title: 'Power Generation Technologies',
-        description: 'Overview of different power generation methods and their characteristics.',
-        duration: '30 min',
-        type: 'lesson'
-      },
-      {
-        id: 3,
-        title: 'Transmission Systems',
-        description: 'High-voltage transmission networks and their operation.',
-        duration: '35 min',
-        type: 'lesson'
-      },
-      {
-        id: 4,
-        title: 'Basic Grid Simulation',
-        description: 'Hands-on simulation of a simple power grid.',
-        duration: '45 min',
-        type: 'simulation'
-      }
-    ]
-  },
-  'market-operations': {
-    title: 'Market Operations',
-    description: 'Learn how electricity markets function, including day-ahead and real-time market clearing mechanisms.',
-    duration: '6 weeks',
-    students: 890,
-    difficulty: 'Intermediate',
-    lessons: [
-      {
-        id: 1,
-        title: 'Introduction to Electricity Markets',
-        description: 'History and structure of deregulated electricity markets.',
-        duration: '30 min',
-        type: 'lesson'
-      },
-      {
-        id: 2,
-        title: 'Day-Ahead Market Operations',
-        description: 'How day-ahead markets clear and set prices.',
-        duration: '40 min',
-        type: 'lesson'
-      },
-      {
-        id: 3,
-        title: 'Real-Time Market Clearing',
-        description: 'Understanding real-time dispatch and pricing.',
-        duration: '35 min',
-        type: 'lesson'
-      },
-      {
-        id: 4,
-        title: 'Market Clearing Simulation',
-        description: 'Interactive simulation of market clearing process.',
-        duration: '60 min',
-        type: 'simulation'
-      }
-    ]
-  }
-};
+import { ArrowLeft, Play, Clock, Users, BarChart3, CheckCircle, BookOpen, Star } from 'lucide-react';
+import { getCourseBySlug } from '@/sanity/lib/fetch';
+import { getDifficultyColor } from '@/sanity/lib/fetch';
+import { PortableText } from '@portabletext/react';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { AppLayout } from '@/components/app/AppLayout';
 
 interface CoursePageProps {
   params: Promise<{ courseId: string }>;
 }
 
+// Icon mapping for categories
+const iconMap = {
+  'Zap': BarChart3, // Using BarChart3 as fallback for any Zap icons
+  'BarChart3': BarChart3,
+  'Shield': CheckCircle, // Using CheckCircle as fallback for Shield
+  'BookOpen': BookOpen,
+  'Play': Play,
+} as const;
+
+const portableTextComponents = {
+  block: {
+    h2: ({children}: any) => <h2 className="text-xl font-semibold text-white mb-3 mt-6">{children}</h2>,
+    h3: ({children}: any) => <h3 className="text-lg font-medium text-slate-200 mb-2 mt-4">{children}</h3>,
+    normal: ({children}: any) => <p className="text-slate-300 mb-3 leading-relaxed">{children}</p>,
+  },
+};
+
 export default async function CoursePage({ params }: CoursePageProps) {
   const { courseId } = await params;
-  const course = courseData[courseId as keyof typeof courseData];
+  const course = await getCourseBySlug(courseId);
 
   if (!course) {
     notFound();
   }
 
+  const IconComponent = iconMap[course.category.icon as keyof typeof iconMap] || BarChart3;
+
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Back Button */}
-        <Link
-          href="/courses"
-          className="inline-flex items-center space-x-2 text-slate-300 hover:text-white mb-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Courses</span>
-        </Link>
+    <AppLayout
+      title={course.title}
+      subtitle={`${course.category.title} • ${course.difficulty} • ${course.duration}`}
+      headerActions={
+        <div className="flex items-center gap-4">
+          <Link
+            href="/app/courses"
+            className="inline-flex items-center space-x-2 text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to Courses</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Badge className={getDifficultyColor(course.difficulty)}>
+              {course.difficulty}
+            </Badge>
+            <div className="flex items-center gap-1 text-sm text-slate-400">
+              <Star className="h-4 w-4 text-yellow-400" />
+              {course.rating}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div className="max-w-7xl mx-auto space-y-8">
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg border border-electric-800/40 p-8">
-              <h1 className="text-3xl font-bold text-white mb-4">
-                {course.title}
-              </h1>
-              <p className="text-lg text-slate-300 mb-6">
-                {course.description}
-              </p>
-
-              {/* Course Stats */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="text-center p-4 bg-gradient-to-br from-electric-950/30 to-electric-900/30 rounded-lg border border-electric-800/20">
-                  <Clock className="h-6 w-6 text-primary-600 mx-auto mb-2" />
-                  <div className="font-semibold text-white">{course.duration}</div>
-                  <div className="text-sm text-slate-300">Duration</div>
+            {/* Course Header */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-8">
+              <div className="flex items-start gap-6 mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-br ${course.category.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <IconComponent className="h-8 w-8 text-white" />
                 </div>
-                <div className="text-center p-4 bg-gradient-to-br from-power-950/30 to-power-900/30 rounded-lg border border-power-700/20">
-                  <Users className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                  <div className="font-semibold text-white">{course.students.toLocaleString()}</div>
-                  <div className="text-sm text-slate-300">Students</div>
-                </div>
-                <div className="text-center p-4 bg-gradient-to-br from-electric-950/30 to-power-950/30 rounded-lg border border-electric-700/20">
-                  <BarChart3 className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                  <div className="font-semibold text-white">{course.difficulty}</div>
-                  <div className="text-sm text-slate-300">Level</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Badge className={getDifficultyColor(course.difficulty)}>
+                      {course.difficulty}
+                    </Badge>
+                    <Badge variant="neutral">
+                      {course.category.title}
+                    </Badge>
+                  </div>
+                  <h1 className="text-3xl font-bold text-white mb-4">
+                    {course.title}
+                  </h1>
+                  <p className="text-lg text-slate-300 mb-4">
+                    {course.description}
+                  </p>
+                  <div className="flex items-center gap-6 text-sm text-slate-400">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {course.duration}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {course.enrollmentCount.toLocaleString()} students
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-400" />
+                      {course.rating}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Course Outline */}
-              <div>
-                <h2 className="text-xl font-bold text-white mb-6">Course Outline</h2>
+              {/* Course Description */}
+              {course.fullDescription && (
+                <div className="prose prose-slate max-w-none">
+                  <PortableText 
+                    value={course.fullDescription} 
+                    components={portableTextComponents}
+                  />
+                </div>
+              )}
+
+              {/* Learning Objectives */}
+              {course.learningObjectives && course.learningObjectives.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-white mb-4">Learning Objectives</h2>
+                  <ul className="space-y-2">
+                    {course.learningObjectives.map((objective, index) => (
+                      <li key={index} className="flex items-start gap-2 text-slate-300">
+                        <CheckCircle className="h-5 w-5 text-electric-400 flex-shrink-0 mt-0.5" />
+                        {objective}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Course Outline */}
+            {course.lessons && course.lessons.length > 0 && (
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-8">
+                <h2 className="text-xl font-semibold text-white mb-6">Course Lessons</h2>
                 <div className="space-y-4">
                   {course.lessons.map((lesson, index) => (
                     <Link
-                      key={lesson.id}
-                      href={`/courses/${courseId}/lessons/${lesson.id}`}
-                      className="flex items-center space-x-4 p-4 bg-gradient-to-r from-slate-800 to-slate-700 rounded-lg border border-electric-800/40 hover:from-slate-700 hover:to-slate-600 hover:border-electric-600/60 transition-all duration-200 cursor-pointer"
+                      key={lesson._id}
+                      href={`/app/courses/${courseId}/lessons/${lesson.slug.current}`}
+                      className="flex items-center space-x-4 p-4 bg-slate-800 rounded-lg border border-slate-700 hover:bg-slate-700 hover:border-slate-600 transition-all duration-200 group"
                     >
                       <div className="flex-shrink-0">
                         <div className="w-8 h-8 bg-gradient-to-r from-electric-500 to-electric-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                          {index + 1}
+                          {lesson.orderIndex}
                         </div>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-white mb-1">
+                        <h3 className="font-semibold text-white mb-1 group-hover:text-electric-300 transition-colors">
                           {lesson.title}
                         </h3>
-                        <p className="text-slate-300 text-sm mb-2">
-                          {lesson.description}
-                        </p>
+                        {lesson.description && (
+                          <p className="text-slate-300 text-sm mb-2">
+                            {lesson.description}
+                          </p>
+                        )}
                         <div className="flex items-center space-x-4">
                           <span className="text-xs text-slate-400 flex items-center space-x-1">
                             <Clock className="h-3 w-3" />
-                            <span>{lesson.duration}</span>
+                            <span>{lesson.estimatedDuration} min</span>
                           </span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            lesson.type === 'simulation'
-                              ? 'bg-power-900/50 text-power-400 border border-power-700/50'
-                              : 'bg-electric-900/50 text-electric-400 border border-electric-700/50'
-                          }`}>
-                            {lesson.type === 'simulation' ? 'Simulation' : 'Lesson'}
-                          </span>
+                          {lesson.hasQuiz && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 border border-blue-700/50">
+                              Quiz
+                            </span>
+                          )}
+                          {lesson.hasSimulation && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-power-900/50 text-power-400 border border-power-700/50">
+                              Simulation
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex-shrink-0">
-                        {lesson.type === 'simulation' ? (
-                          <BarChart3 className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Play className="h-5 w-5 text-primary-600" />
-                        )}
+                        <Play className="h-5 w-5 text-slate-400 group-hover:text-electric-400 transition-colors" />
                       </div>
                     </Link>
                   ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Enrollment Card */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg border border-electric-800/40 p-6">
-              <h3 className="text-lg font-bold text-white mb-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">
                 Get Started
               </h3>
-              <Link
-                href={`/courses/${courseId}/lessons/1`}
-                className="w-full bg-gradient-to-r from-electric-500 to-electric-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg hover:shadow-electric-500/25 transition-all duration-200 flex items-center justify-center gap-2 mb-4"
-              >
-                Start Course
-                <Play className="h-4 w-4" />
-              </Link>
-              <p className="text-sm text-slate-300 text-center">
-                Join {course.students.toLocaleString()} other students
-              </p>
+              <div className="space-y-4">
+                {course.lessons && course.lessons.length > 0 ? (
+                  <Link href={`/app/courses/${courseId}/lessons/${course.lessons[0].slug.current}`}>
+                    <Button variant="primary" size="lg" className="w-full" icon={Play}>
+                      Start Course
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="outline" size="lg" className="w-full" disabled>
+                    No Lessons Available
+                  </Button>
+                )}
+                
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white">
+                    {course.price.isFree ? 'FREE' : `$${course.price.amount}`}
+                  </div>
+                  <p className="text-sm text-slate-400">
+                    Join {course.enrollmentCount.toLocaleString()} other students
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* What You'll Learn */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg border border-electric-800/40 p-6">
-              <h3 className="text-lg font-bold text-white mb-4">
-                What You'll Learn
-              </h3>
-              <ul className="space-y-3">
-                <li className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-300 text-sm">
-                    Fundamental concepts of electrical power systems
+            {/* Course Stats */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Course Details</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Duration</span>
+                  <span className="text-white">{course.duration}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Level</span>
+                  <span className="text-white">{course.difficulty}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Students</span>
+                  <span className="text-white">{course.enrollmentCount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Rating</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    <span className="text-white">{course.rating}</span>
+                  </div>
+                </div>
+                {course.estimatedHours && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Estimated Time</span>
+                    <span className="text-white">{course.estimatedHours} hours</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Instructor */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Instructor</h3>
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-electric-500 to-power-400 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">
+                    {course.instructor.name.split(' ').map(n => n[0]).join('')}
                   </span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-300 text-sm">
-                    How electricity markets operate and clear
-                  </span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-300 text-sm">
-                    Hands-on experience with market simulations
-                  </span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-slate-300 text-sm">
-                    Real-world applications and case studies
-                  </span>
-                </li>
-              </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white">{course.instructor.name}</h4>
+                  {course.instructor.title && (
+                    <p className="text-sm text-slate-400">{course.instructor.title}</p>
+                  )}
+                  {course.instructor.experience && (
+                    <p className="text-sm text-slate-400">{course.instructor.experience} years experience</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Prerequisites */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg border border-electric-800/40 p-6">
-              <h3 className="text-lg font-bold text-white mb-4">
-                Prerequisites
-              </h3>
-              <ul className="space-y-2">
-                <li className="text-slate-300 text-sm">
-                  • Basic understanding of economics
-                </li>
-                <li className="text-slate-300 text-sm">
-                  • High school level mathematics
-                </li>
-                <li className="text-slate-300 text-sm">
-                  • Interest in energy markets
-                </li>
-              </ul>
-            </div>
+            {course.prerequisites && course.prerequisites.length > 0 && (
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Prerequisites</h3>
+                <div className="space-y-2">
+                  {course.prerequisites.map((prereq) => (
+                    <Link 
+                      key={prereq._id}
+                      href={`/app/courses/${prereq.slug.current}`}
+                      className="block p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="font-medium text-white">{prereq.title}</div>
+                      <div className="text-sm text-slate-400">{prereq.difficulty}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            {course.tags && course.tags.length > 0 && (
+              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Topics</h3>
+                <div className="flex flex-wrap gap-2">
+                  {course.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-slate-800 text-slate-300 rounded-full text-sm hover:bg-slate-700 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

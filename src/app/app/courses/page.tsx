@@ -18,104 +18,53 @@ import {
   BarChart3,
   Shield
 } from 'lucide-react';
+import { getCourses } from '@/sanity/lib/fetch';
+import { getDifficultyColor } from '@/sanity/lib/fetch';
+import type { Course } from '@/sanity/lib/types';
 
-export default function AppCoursesPage() {
-  const courses = [
-    {
-      id: 'grid-fundamentals',
-      title: 'Grid Fundamentals',
-      description: 'Understanding the basics of electrical grids, power generation, transmission, and distribution systems.',
-      instructor: 'Dr. Sarah Chen',
-      duration: '4 weeks',
-      difficulty: 'Beginner',
-      students: 1250,
-      rating: 4.8,
-      progress: 85,
-      icon: Zap,
-      color: 'from-blue-500 to-cyan-500',
-      lessons: 13,
-      completedLessons: 11,
-      simulations: 3,
-      status: 'enrolled',
-      nextLesson: 'Power Flow Analysis',
-      tags: ['fundamentals', 'grid', 'transmission']
-    },
-    {
-      id: 'market-operations',
-      title: 'Market Operations',
-      description: 'Learn how electricity markets function, including day-ahead and real-time market clearing mechanisms.',
-      instructor: 'Prof. Michael Torres',
-      duration: '6 weeks',
-      difficulty: 'Intermediate',
-      students: 890,
-      rating: 4.9,
-      progress: 40,
-      icon: BarChart3,
-      color: 'from-green-500 to-emerald-500',
-      lessons: 18,
-      completedLessons: 7,
-      simulations: 5,
-      status: 'enrolled',
-      nextLesson: 'Economic Dispatch Models',
-      tags: ['markets', 'pricing', 'operations']
-    },
-    {
-      id: 'risk-management',
-      title: 'Risk Management',
-      description: 'Advanced strategies for managing financial and operational risks in power trading and market participation.',
-      instructor: 'Dr. Jennifer Liu',
-      duration: '5 weeks',
-      difficulty: 'Advanced',
-      students: 450,
-      rating: 4.7,
-      progress: 0,
-      icon: Shield,
-      color: 'from-purple-500 to-violet-500',
-      lessons: 15,
-      completedLessons: 0,
-      simulations: 4,
-      status: 'available',
-      nextLesson: 'Introduction to Portfolio Theory',
-      tags: ['risk', 'finance', 'trading']
-    },
-    {
-      id: 'renewable-integration',
-      title: 'Renewable Integration',
-      description: 'Managing variable renewable energy sources in modern electricity markets and grid operations.',
-      instructor: 'Dr. Robert Kim',
-      duration: '4 weeks',
-      difficulty: 'Intermediate',
-      students: 320,
-      rating: 4.6,
-      progress: 0,
-      icon: Zap,
-      color: 'from-green-400 to-blue-500',
-      lessons: 12,
-      completedLessons: 0,
-      simulations: 6,
-      status: 'locked',
-      prerequisite: 'Grid Fundamentals',
-      tags: ['renewable', 'solar', 'wind', 'integration']
-    }
-  ];
+// Icon mapping for categories
+const iconMap = {
+  'Zap': Zap,
+  'BarChart3': BarChart3,
+  'Shield': Shield,
+  'BookOpen': BookOpen,
+  'Play': Play,
+} as const;
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner': return 'bg-green-900/50 text-green-300';
-      case 'Intermediate': return 'bg-yellow-900/50 text-yellow-300';
-      case 'Advanced': return 'bg-red-900/50 text-red-300';
-      default: return 'bg-slate-700 text-slate-300';
-    }
+interface CourseWithProgress extends Course {
+  // Mock progress data - this would come from user progress tracking
+  progress?: number;
+  completedLessons?: number;
+  enrollmentStatus?: 'enrolled' | 'available' | 'completed' | 'locked';
+  nextLesson?: string;
+}
+
+function mockUserProgress(course: Course): CourseWithProgress {
+  // Mock data for demo - in real app this would come from user progress API
+  const mockProgress = {
+    'grid-fundamentals': { progress: 85, completedLessons: 11, enrollmentStatus: 'enrolled' as const, nextLesson: 'Power Flow Analysis' },
+    'market-operations': { progress: 40, completedLessons: 7, enrollmentStatus: 'enrolled' as const, nextLesson: 'Economic Dispatch Models' },
+    'risk-management': { progress: 0, completedLessons: 0, enrollmentStatus: 'available' as const },
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'enrolled': return Play;
-      case 'completed': return CheckCircle;
-      case 'locked': return Lock;
-      default: return BookOpen;
-    }
+  
+  return {
+    ...course,
+    ...mockProgress[course.slug.current as keyof typeof mockProgress],
   };
+}
+
+function getStatusIcon(status: string) {
+  switch (status) {
+    case 'enrolled': return Play;
+    case 'completed': return CheckCircle;
+    case 'locked': return Lock;
+    default: return BookOpen;
+  }
+}
+
+export default async function AppCoursesPage() {
+  const courses = await getCourses();
+  const coursesWithProgress = courses.map(mockUserProgress);
 
   return (
     <AppLayout
@@ -151,21 +100,21 @@ export default function AppCoursesPage() {
 
         {/* Course Grid */}
         <div className="grid gap-6">
-          {courses.map((course) => {
-            const IconComponent = course.icon;
-            const isLocked = course.status === 'locked';
-            const isEnrolled = course.status === 'enrolled';
+          {coursesWithProgress.map((course) => {
+            const IconComponent = iconMap[course.category.icon as keyof typeof iconMap] || Zap;
+            const isLocked = course.enrollmentStatus === 'locked';
+            const isEnrolled = course.enrollmentStatus === 'enrolled';
             
             return (
               <div
-                key={course.id}
+                key={course._id}
                 className={`bg-slate-900 border border-slate-800 rounded-xl overflow-hidden ${
                   isLocked ? 'opacity-60' : 'hover:border-slate-700'
                 } transition-all`}
               >
                 <div className="flex">
                   {/* Course Header with Icon */}
-                  <div className={`bg-gradient-to-br ${course.color} w-24 flex items-center justify-center`}>
+                  <div className={`bg-gradient-to-br ${course.category.color} w-24 flex items-center justify-center`}>
                     <IconComponent className="h-8 w-8 text-white" />
                   </div>
 
@@ -192,15 +141,11 @@ export default function AppCoursesPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <BookOpen className="h-3 w-3" />
-                            {course.lessons} lessons
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Play className="h-3 w-3" />
-                            {course.simulations} simulations
+                            {course.lessons?.length || 0} lessons
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            {course.students.toLocaleString()} students
+                            {course.enrollmentCount.toLocaleString()} students
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 text-yellow-400" />
@@ -220,13 +165,13 @@ export default function AppCoursesPage() {
                         </div>
 
                         <div className="text-xs text-slate-400">
-                          Instructor: <span className="text-slate-300">{course.instructor}</span>
+                          Instructor: <span className="text-slate-300">{course.instructor.name}</span>
                         </div>
                       </div>
 
                       {/* Course Status & Actions */}
                       <div className="ml-6 text-right min-w-0">
-                        {isEnrolled && (
+                        {isEnrolled && course.progress !== undefined && (
                           <div className="mb-4">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs text-slate-400">Progress</span>
@@ -239,7 +184,7 @@ export default function AppCoursesPage() {
                               />
                             </div>
                             <div className="mt-2 text-xs text-slate-400">
-                              {course.completedLessons}/{course.lessons} lessons
+                              {course.completedLessons}/{course.lessons?.length || 0} lessons
                             </div>
                           </div>
                         )}
@@ -248,24 +193,26 @@ export default function AppCoursesPage() {
                           <div className="text-center">
                             <Lock className="h-5 w-5 text-slate-400 mx-auto mb-2" />
                             <div className="text-xs text-slate-400">
-                              Complete: {course.prerequisite}
+                              Prerequisites required
                             </div>
                           </div>
                         ) : isEnrolled ? (
                           <div className="space-y-2">
-                            <Link href={`/app/courses/${course.id}`}>
+                            <Link href={`/app/courses/${course.slug.current}`}>
                               <Button variant="primary" size="sm" icon={ArrowRight}>
                                 Continue
                               </Button>
                             </Link>
-                            <div className="text-xs text-slate-400">
-                              Next: {course.nextLesson}
-                            </div>
+                            {course.nextLesson && (
+                              <div className="text-xs text-slate-400">
+                                Next: {course.nextLesson}
+                              </div>
+                            )}
                           </div>
                         ) : (
-                          <Link href={`/app/courses/${course.id}`}>
-                            <Button variant="outline" size="sm" icon={getStatusIcon(course.status)}>
-                              Enroll
+                          <Link href={`/app/courses/${course.slug.current}`}>
+                            <Button variant="outline" size="sm" icon={getStatusIcon(course.enrollmentStatus || 'available')}>
+                              {course.price.isFree ? 'Enroll Free' : `Enroll $${course.price.amount}`}
                             </Button>
                           </Link>
                         )}
@@ -277,6 +224,15 @@ export default function AppCoursesPage() {
             );
           })}
         </div>
+
+        {/* No courses message */}
+        {coursesWithProgress.length === 0 && (
+          <div className="text-center py-12">
+            <BookOpen className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-300 mb-2">No courses available</h3>
+            <p className="text-slate-400">Check back soon for new courses!</p>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
