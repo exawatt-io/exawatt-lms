@@ -15,7 +15,7 @@ export function AppLayout({ children, title, subtitle, headerActions }: AppLayou
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="h-screen flex bg-slate-950">
+    <div className="h-screen flex bg-slate-950 fixed inset-0 z-50">
       {/* Sidebar */}
       <AppSidebar 
         collapsed={sidebarCollapsed}

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/Navigation";
-import { ElectricityBackground } from "@/components/ElectricityBackground";
+import { ConditionalLayout } from "@/components/ConditionalLayout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,13 +40,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} antialiased bg-dark-950`}>
-        <ElectricityBackground />
-        <div className="relative min-h-screen">
-          <Navigation />
-          <main className="pt-16 relative z-10">
-            {children}
-          </main>
-        </div>
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );
