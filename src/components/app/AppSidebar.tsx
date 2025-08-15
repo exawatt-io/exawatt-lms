@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -13,10 +13,6 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  Zap,
-  TrendingUp,
-  Shield,
-  Wind,
   Activity
 } from 'lucide-react';
 
@@ -41,23 +37,12 @@ const navigationItems: NavItem[] = [
     label: 'Courses',
     href: '/app/courses',
     icon: BookOpen,
-    children: [
-      { id: 'grid-fundamentals', label: 'Grid Fundamentals', href: '/app/courses/grid-fundamentals', icon: Zap },
-      { id: 'market-operations', label: 'Market Operations', href: '/app/courses/market-operations', icon: TrendingUp },
-      { id: 'risk-management', label: 'Risk Management', href: '/app/courses/risk-management', icon: Shield },
-    ]
   },
   {
     id: 'simulations',
     label: 'Simulations',
     href: '/app/simulations',
     icon: Play,
-    children: [
-      { id: 'market-clearing', label: 'Market Clearing', href: '/app/simulations/market-clearing', icon: BarChart3 },
-      { id: 'dispatch-optimization', label: 'Economic Dispatch', href: '/app/simulations/dispatch-optimization', icon: Zap },
-      { id: 'lmp-formation', label: 'LMP Formation', href: '/app/simulations/lmp-formation', icon: TrendingUp },
-      { id: 'renewable-integration', label: 'Renewable Integration', href: '/app/simulations/renewable-integration', icon: Wind },
-    ]
   },
   {
     id: 'analytics',
@@ -96,15 +81,6 @@ interface AppSidebarProps {
 
 export function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarProps) {
   const pathname = usePathname();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['courses', 'simulations']);
-
-  const toggleExpanded = (itemId: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
-  };
 
   const isActive = (href: string) => {
     if (href === '/app/dashboard') {
@@ -113,11 +89,7 @@ export function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarPr
     return pathname.startsWith(href);
   };
 
-  const isExpanded = (itemId: string) => expandedItems.includes(itemId);
-
-  const NavItemComponent = ({ item, level = 0 }: { item: NavItem; level?: number }) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const expanded = isExpanded(item.id);
+  const NavItemComponent = ({ item }: { item: NavItem }) => {
     const active = isActive(item.href);
 
     return (
@@ -126,18 +98,10 @@ export function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarPr
           <Link
             href={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-              level > 0 ? 'ml-6' : ''
-            } ${
               active 
                 ? 'bg-electric-600 text-white shadow-lg' 
                 : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
             }`}
-            onClick={(e) => {
-              if (hasChildren && !collapsed) {
-                e.preventDefault();
-                toggleExpanded(item.id);
-              }
-            }}
           >
             <item.icon className={`h-5 w-5 flex-shrink-0 ${
               active ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'
@@ -152,12 +116,6 @@ export function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarPr
                     {item.badge}
                   </span>
                 )}
-                
-                {hasChildren && (
-                  <ChevronRight className={`h-4 w-4 transition-transform ${
-                    expanded ? 'rotate-90' : ''
-                  }`} />
-                )}
               </>
             )}
           </Link>
@@ -166,14 +124,6 @@ export function AppSidebar({ collapsed = false, onToggleCollapse }: AppSidebarPr
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-electric-400 rounded-r-full" />
           )}
         </div>
-
-        {hasChildren && expanded && !collapsed && (
-          <div className="mt-1 space-y-1">
-            {item.children?.map(child => (
-              <NavItemComponent key={child.id} item={child} level={level + 1} />
-            ))}
-          </div>
-        )}
       </div>
     );
   };

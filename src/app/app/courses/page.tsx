@@ -109,10 +109,10 @@ export default function AppCoursesPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'enrolled': return <Play className="h-4 w-4" />;
-      case 'completed': return <CheckCircle className="h-4 w-4" />;
-      case 'locked': return <Lock className="h-4 w-4" />;
-      default: return <BookOpen className="h-4 w-4" />;
+      case 'enrolled': return Play;
+      case 'completed': return CheckCircle;
+      case 'locked': return Lock;
+      default: return BookOpen;
     }
   };
 
@@ -252,7 +252,7 @@ export default function AppCoursesPage() {
                           </div>
                         ) : isEnrolled ? (
                           <div className="space-y-2">
-                            <Button variant="primary" size="sm" icon={ArrowRight}>
+                            <Button variant="primary" size="sm" icon={ArrowRight} href={`/app/courses/${course.id}`}>
                               Continue
                             </Button>
                             <div className="text-xs text-slate-400">
@@ -260,7 +260,7 @@ export default function AppCoursesPage() {
                             </div>
                           </div>
                         ) : (
-                          <Button variant="outline" size="sm" icon={getStatusIcon(course.status)}>
+                          <Button variant="outline" size="sm" icon={getStatusIcon(course.status)} href={`/app/courses/${course.id}`}>
                             Enroll
                           </Button>
                         )}

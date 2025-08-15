@@ -185,7 +185,7 @@ export default function AppSimulationsPage() {
                 15-30 min
               </div>
             </div>
-            <Button variant="secondary" size="lg" icon={Play}>
+            <Button variant="secondary" size="lg" icon={Play} href="/app/simulations/market-clearing">
               Launch Simulation
             </Button>
           </div>
@@ -303,6 +303,7 @@ export default function AppSimulationsPage() {
                     size="sm"
                     icon={isLocked ? Lock : Play}
                     disabled={isLocked}
+                    href={isLocked ? undefined : `/app/simulations/${simulation.id}`}
                   >
                     {isLocked ? 'Locked' : 'Launch'}
                   </Button>
