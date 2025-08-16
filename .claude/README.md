@@ -4,13 +4,13 @@ This directory contains comprehensive documentation for the ExaWatt power market
 
 ## Documentation Overview
 
-### 📋 [Sanity CMS Documentation](./sanity-cms-documentation.md)
-Complete guide to the content management system including:
-- Content architecture and relationships
-- Schema definitions and field organization
-- Studio structure and navigation
-- GROQ queries and frontend integration
-- SEO optimization and structured data
+### 📋 **Sanity CMS Documentation**
+Complete guide to the content management system:
+- **[Overview](./sanity-overview.md)** - High-level architecture and implementation status
+- **[Schema Design](./sanity-schemas.md)** - Content types, fields, and relationships
+- **[Content Workflows](./sanity-workflows.md)** - Content creation and management processes
+- **[Technical Integration](./sanity-integration.md)** - GROQ queries, frontend integration, and performance
+- **[Migration Guide](./sanity-migration.md)** - Content migration tools and troubleshooting
 
 ### 🎨 [Design System](./design-system.md)  
 Comprehensive component library documentation covering:
