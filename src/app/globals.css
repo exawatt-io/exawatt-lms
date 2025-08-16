@@ -1,15 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0f1c;
+  /* Industrial Power Theme */
+  --background: #0f172a;
   --foreground: #e2e8f0;
-  --primary: #00d4ff;
-  --secondary: #64748b;
+  --primary: #374151;        /* Charcoal primary */
+  --primary-hover: #4b5563;  /* Lighter charcoal for hover */
+  --primary-active: #1f2937; /* Darker charcoal for active */
+  --secondary: #10b981;      /* Emerald secondary */
+  --secondary-hover: #059669; /* Emerald hover */
+  --accent: #f59e0b;         /* Amber accent */
+  --accent-hover: #d97706;   /* Amber hover */
+  --accent-light: #fbbf24;   /* Light amber */
   --muted: #1e293b;
   --border: #334155;
-  --accent: #fbbf24;
   --card: #1e293b;
   --card-foreground: #f1f5f9;
+  
+  /* Semantic Color Tokens - CHANGE THESE TO SWITCH ENTIRE THEME */
+  --color-primary: var(--electric-blue-500);
+  --color-primary-hover: var(--electric-blue-400);
+  --color-primary-active: var(--electric-blue-600);
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: var(--electric-green-500);
+  --color-secondary-hover: var(--electric-green-400);
+  --color-secondary-active: var(--electric-green-600);
+  --color-secondary-foreground: #ffffff;
+  
+  --color-accent: var(--electric-orange-500);
+  --color-accent-hover: var(--electric-orange-400);
+  --color-accent-active: var(--electric-orange-600);
+  --color-accent-foreground: #ffffff;
+  
+  --color-success: var(--electric-green-500);
+  --color-warning: var(--electric-orange-500);
+  --color-error: #ef4444;
+  --color-info: var(--electric-blue-400);
+  
+  /* Gradient Tokens - Easy to change gradients site-wide */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--electric-blue-600) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent) 0%, var(--electric-orange-600) 100%);
+  --gradient-card: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%);
+  
+  /* Glow Effects - Adjust intensity by changing alpha values */
+  --glow-primary: 0 0 20px rgba(14, 165, 233, 0.3);
+  --glow-accent: 0 0 20px rgba(251, 146, 60, 0.3);
+  --glow-success: 0 0 20px rgba(34, 197, 94, 0.3);
+  
+  /* Legacy electric blue (for gradual migration) */
+  --electric-400: #00d4ff;
+  --electric-500: #00bfea;
+  --electric-600: #0099cc;
+  --electric-700: #007399;
+  --electric-800: #004d66;
+  --electric-900: #002633;
+  
+  /* Electric Energy Color Palette */
+  --electric-blue-300: #7dd3fc;
+  --electric-blue-400: #38bdf8;
+  --electric-blue-500: #0ea5e9;
+  --electric-blue-600: #0284c7;
+  --electric-blue-700: #0369a1;
+  --electric-blue-800: #075985;
+  --electric-blue-900: #0c4a6e;
+  
+  --electric-orange-300: #fdba74;
+  --electric-orange-400: #fb923c;
+  --electric-orange-500: #f97316;
+  --electric-orange-600: #ea580c;
+  --electric-orange-700: #c2410c;
+  --electric-orange-800: #9a3412;
+  --electric-orange-900: #7c2d12;
+  
+  --electric-green-300: #86efac;
+  --electric-green-400: #4ade80;
+  --electric-green-500: #22c55e;
+  --electric-green-600: #16a34a;
+  --electric-green-700: #15803d;
+  --electric-green-800: #166534;
+  --electric-green-900: #14532d;
+  
+  /* Legacy/Alternative Palettes */
+  --charcoal-400: #6b7280;
+  --charcoal-500: #4b5563;
+  --charcoal-600: #374151;
+  --charcoal-700: #1f2937;
+  --charcoal-800: #111827;
+  --charcoal-900: #030712;
+  
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
 }
 
 @theme inline {

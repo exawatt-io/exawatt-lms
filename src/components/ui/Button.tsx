@@ -4,7 +4,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   icon?: LucideIcon;
   iconPosition?: 'left' | 'right';
@@ -28,10 +28,11 @@ export function Button({
   };
   
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-electric-500 to-electric-600 text-white hover:shadow-lg hover:shadow-electric-500/25',
-    secondary: 'bg-gradient-to-r from-electric-500 to-power-400 text-dark-900 hover:shadow-lg hover:shadow-electric-500/25',
-    outline: 'border-2 border-power-400/50 text-power-400 hover:bg-power-400/10 hover:border-power-400',
-    ghost: 'text-slate-300 hover:text-white hover:bg-slate-800'
+    primary: 'bg-gradient-primary hover:shadow-glow-primary active:scale-95 text-[var(--color-primary-foreground)] transition-all duration-200',
+    secondary: 'bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-hover)] hover:shadow-glow-success active:scale-95 text-[var(--color-secondary-foreground)] transition-all duration-200',
+    accent: 'bg-gradient-accent hover:shadow-glow-accent active:scale-95 text-[var(--color-accent-foreground)] transition-all duration-200',
+    outline: 'border-2 border-[var(--color-accent)]/50 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 hover:border-[var(--color-accent)] hover:shadow-glow-accent',
+    ghost: 'text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200'
   };
   
   const iconSize = size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';

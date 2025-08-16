@@ -77,7 +77,7 @@ export default async function AppSimulationsPage() {
           <Button variant="outline" size="sm" icon={Search}>
             Search
           </Button>
-          <Button variant="primary" size="sm" icon={Play}>
+          <Button variant="accent" size="sm" icon={Play}>
             Quick Start
           </Button>
         </div>

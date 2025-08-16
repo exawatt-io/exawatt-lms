@@ -71,7 +71,7 @@ export function SimulationCard({
         </div>
 
         <Link href={`/simulations/${id}`}>
-          <Button variant="primary" className="w-full" icon={ArrowRight}>
+          <Button variant="accent" className="w-full" icon={ArrowRight}>
             Launch Simulation
           </Button>
         </Link>

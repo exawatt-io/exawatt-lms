@@ -14,6 +14,7 @@ import {
   Activity,
   Award
 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 export default function DashboardPage() {
   const recentActivity = [
@@ -92,9 +93,13 @@ export default function DashboardPage() {
                     
                     <div className="text-right">
                       <p className="text-xs text-slate-400">{activity.time}</p>
-                      <Button variant="ghost" size="sm" icon={ArrowRight}>
-                        Continue
-                      </Button>
+                      {activity.progress === 100 ? (
+                        <Badge variant="success" size="sm">Complete</Badge>
+                      ) : (
+                        <Button variant="ghost" size="sm" icon={ArrowRight}>
+                          Continue
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -108,10 +113,10 @@ export default function DashboardPage() {
             <FeatureCard>
               <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <Button variant="primary" className="w-full justify-start" icon={Play}>
+                <Button variant="accent" className="w-full justify-start" icon={Play}>
                   Run Market Simulation
                 </Button>
-                <Button variant="outline" className="w-full justify-start" icon={BookOpen}>
+                <Button variant="secondary" className="w-full justify-start" icon={BookOpen}>
                   Continue Learning
                 </Button>
                 <Button variant="outline" className="w-full justify-start" icon={BarChart3}>
@@ -131,13 +136,12 @@ export default function DashboardPage() {
                         <h4 className="text-sm font-medium text-white">{deadline.lesson}</h4>
                         <p className="text-xs text-slate-400">{deadline.course}</p>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        deadline.urgent 
-                          ? 'bg-red-900/50 text-red-300' 
-                          : 'bg-slate-700 text-slate-300'
-                      }`}>
-                        {deadline.due}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        {deadline.urgent && (
+                          <Badge variant="warning" size="sm">Urgent</Badge>
+                        )}
+                        <span className="text-xs text-slate-400">{deadline.due}</span>
+                      </div>
                     </div>
                   </div>
                 ))}

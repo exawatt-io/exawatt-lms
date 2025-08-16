@@ -5,20 +5,73 @@ The ExaWatt design system provides a cohesive set of reusable components built o
 
 ## Color Palette
 
-### Primary Colors
+### Electric Energy Theme
+The ExaWatt design system uses an "Electric Energy" theme that combines vibrant electric blue, energetic orange, and dynamic green for a modern, tech-forward energy platform aesthetic.
+
+### Primary Colors (Electric Blue)
 ```css
---electric-400: #00d4ff    /* Primary electric blue */
---electric-500: #00bfea    /* Electric blue hover state */
---electric-600: #0099cc    /* Electric blue active state */
---electric-700: #007399    /* Electric blue accent */
---electric-800: #004d66    /* Electric blue border */
---electric-900: #002633    /* Electric blue background */
+--electric-blue-300: #7dd3fc    /* Light electric blue */
+--electric-blue-400: #38bdf8    /* Electric blue text/icons */
+--electric-blue-500: #0ea5e9    /* Primary electric blue */
+--electric-blue-600: #0284c7    /* Electric blue hover */
+--electric-blue-700: #0369a1    /* Dark electric blue */
+--electric-blue-800: #075985    /* Darker electric blue */
+--electric-blue-900: #0c4a6e    /* Darkest electric blue */
 ```
 
-### Secondary Colors
+### Accent Colors (Electric Orange)
 ```css
---power-400: #fbbf24      /* Power yellow accent */
---power-500: #f59e0b      /* Power yellow hover */
+--electric-orange-300: #fdba74   /* Light electric orange */
+--electric-orange-400: #fb923c   /* Electric orange text/icons */
+--electric-orange-500: #f97316   /* Primary electric orange */
+--electric-orange-600: #ea580c   /* Electric orange hover */
+--electric-orange-700: #c2410c   /* Dark electric orange */
+--electric-orange-800: #9a3412   /* Darker electric orange */
+--electric-orange-900: #7c2d12   /* Darkest electric orange */
+```
+
+### Secondary Colors (Electric Green)
+```css
+--electric-green-300: #86efac   /* Light electric green */
+--electric-green-400: #4ade80   /* Electric green text/icons */
+--electric-green-500: #22c55e   /* Primary electric green */
+--electric-green-600: #16a34a   /* Electric green hover */
+--electric-green-700: #15803d   /* Dark electric green */
+--electric-green-800: #166534   /* Darker electric green */
+--electric-green-900: #14532d   /* Darkest electric green */
+```
+
+### Semantic Color System
+**The key to easy theme changes - modify these tokens to instantly change the entire site:**
+```css
+--color-primary: var(--electric-blue-500);    /* Main interactive elements */
+--color-secondary: var(--electric-green-500); /* Learning/educational actions */
+--color-accent: var(--electric-orange-500);   /* Action-oriented buttons */
+--color-success: var(--electric-green-500);   /* Success states */
+--color-warning: var(--electric-orange-500);  /* Warnings/urgent items */
+--color-error: #ef4444;                       /* Error states */
+```
+
+### Visual Effects
+```css
+--gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--electric-blue-600) 100%);
+--gradient-accent: linear-gradient(135deg, var(--color-accent) 0%, var(--electric-orange-600) 100%);
+--glow-primary: 0 0 20px rgba(14, 165, 233, 0.3);
+--glow-accent: 0 0 20px rgba(251, 146, 60, 0.3);
+--glow-success: 0 0 20px rgba(34, 197, 94, 0.3);
+```
+
+### Alternative Theme Palettes
+**For easy theme switching, see `src/lib/theme-presets.ts` for ready-to-use alternatives:**
+```css
+/* Legacy Industrial Power Theme (Conservative) */
+--charcoal-400: #6b7280    /* Available as fallback */
+--amber-400: #fbbf24       /* Available as fallback */
+--emerald-400: #34d399     /* Available as fallback */
+
+/* Legacy Electric Colors (Deprecated) */
+--electric-400: #00d4ff    /* Old electric blue - migrate away */
+--power-400: #fbbf24       /* Now --electric-orange-400 */
 ```
 
 ### Neutral Palette
@@ -70,9 +123,10 @@ Professional button component with consistent styling:
 ```
 
 **Variants:**
-- `primary`: Electric blue background for main actions
-- `secondary`: Power yellow for secondary actions
-- `outline`: Transparent with colored borders
+- `primary`: Electric blue gradient for main structural actions
+- `secondary`: Electric green for learning/educational actions  
+- `accent`: Electric orange gradient for high-energy action buttons
+- `outline`: Transparent with colored borders and glow effects
 - `ghost`: Minimal styling for tertiary actions
 
 **Features:**
@@ -92,9 +146,11 @@ Small labels for categorization and status:
 ```
 
 **Variants:**
-- `default`: Electric blue styling
-- `success`: Green for positive states
-- `warning`: Yellow for caution
+- `primary`: Electric blue styling for main categories
+- `secondary`: Electric green for learning/success states
+- `accent`: Electric orange for action-related badges
+- `success`: Electric green for completion/positive states
+- `warning`: Electric orange for caution/urgent items
 - `error`: Red for problems
 - `neutral`: Gray for general info
 
@@ -187,6 +243,50 @@ Specialized widgets for power market education:
 - `MeritOrderWidget`: Generator dispatch visualization
 - `SupplyCurveWidget`: Supply and demand curve plotting
 - `MarketClearingWidget`: Complete market clearing simulation
+
+## Color Usage Guidelines
+
+### Semantic Color Hierarchy
+**Electric Blue (Primary):** Navigation, headers, main structural elements
+**Electric Orange (Accent):** High-energy actions like simulations, launches, quick actions
+**Electric Green (Secondary):** Learning-focused actions, courses, educational content
+**Success/Warning/Error:** Status indicators and feedback
+
+### Button Color Strategy
+```tsx
+// Simulation actions - use accent (orange) for energy
+<Button variant="accent">Run Simulation</Button>
+<Button variant="accent">Launch Market Analysis</Button>
+
+// Learning actions - use secondary (green) for education  
+<Button variant="secondary">Start Course</Button>
+<Button variant="secondary">Continue Learning</Button>
+
+// Primary structural actions - use primary (blue)
+<Button variant="primary">Save Settings</Button>
+<Button variant="primary">Submit Form</Button>
+```
+
+### Badge Color Strategy
+```tsx
+// Status badges
+<Badge variant="success">Completed</Badge>    // Green
+<Badge variant="warning">Urgent</Badge>       // Orange  
+<Badge variant="error">Failed</Badge>         // Red
+
+// Category badges
+<Badge variant="accent">Simulation</Badge>    // Orange
+<Badge variant="secondary">Course</Badge>     // Green
+<Badge variant="primary">Analysis</Badge>     // Blue
+```
+
+### Easy Theme Switching
+**To change the entire site theme, modify these 3 lines in `globals.css`:**
+```css
+--color-primary: var(--electric-blue-500);    /* Change to any color */
+--color-accent: var(--electric-orange-500);   /* Change to any color */
+--color-secondary: var(--electric-green-500); /* Change to any color */
+```
 
 ## Usage Guidelines
 

@@ -77,7 +77,7 @@ export function CourseCard({
         </div>
 
         <Link href={`/courses/${id}`}>
-          <Button variant="primary" className="w-full" icon={ArrowRight}>
+          <Button variant="secondary" className="w-full" icon={ArrowRight}>
             Start Course
           </Button>
         </Link>
