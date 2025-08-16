@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, CheckCircle, Play } from 'lucide-react';
 import { getLessonBySlug, getCourseBySlug } from '@/sanity/lib/fetch';
-import { PortableText } from '@portabletext/react';
+import { PortableText } from 'next-sanity';
 import { Button } from '@/components/ui/Button';
 import { AppLayout } from '@/components/app/AppLayout';
 
@@ -16,19 +16,66 @@ interface LessonPageProps {
 // Portable Text components for rendering rich content
 const portableTextComponents = {
   block: {
-    h2: ({children}: any) => <h2 className="text-2xl font-semibold text-white mb-4 mt-8">{children}</h2>,
-    h3: ({children}: any) => <h3 className="text-xl font-semibold text-slate-200 mb-3 mt-6">{children}</h3>,
-    h4: ({children}: any) => <h4 className="text-lg font-semibold text-slate-200 mb-2 mt-4">{children}</h4>,
-    normal: ({children}: any) => <p className="text-slate-300 mb-4 leading-relaxed">{children}</p>,
+    h2: ({children}: any) => (
+      <h2 className="text-2xl font-semibold text-white mb-4 mt-8">
+        {children}
+      </h2>
+    ),
+    h3: ({children}: any) => (
+      <h3 className="text-xl font-semibold text-slate-200 mb-3 mt-6">
+        {children}
+      </h3>
+    ),
+    h4: ({children}: any) => (
+      <h4 className="text-lg font-semibold text-slate-200 mb-2 mt-4">
+        {children}
+      </h4>
+    ),
+    normal: ({children}: any) => (
+      <p className="text-slate-300 mb-4 leading-relaxed">
+        {children}
+      </p>
+    ),
     blockquote: ({children}: any) => (
       <blockquote className="border-l-4 border-electric-500 pl-4 py-2 my-4 bg-slate-800/50 rounded-r">
         {children}
       </blockquote>
     ),
   },
+  list: {
+    bullet: ({children}: any) => (
+      <ul className="text-slate-300 mb-4 leading-relaxed space-y-2">
+        {children}
+      </ul>
+    ),
+    number: ({children}: any) => (
+      <ol className="text-slate-300 mb-4 leading-relaxed space-y-2 list-decimal list-inside">
+        {children}
+      </ol>
+    ),
+  },
+  listItem: {
+    bullet: ({children}: any) => (
+      <li className="flex items-start gap-2">
+        <div className="w-1.5 h-1.5 bg-electric-400 rounded-full mt-2 flex-shrink-0" />
+        <span>{children}</span>
+      </li>
+    ),
+    number: ({children}: any) => (
+      <li className="text-slate-300">{children}</li>
+    ),
+  },
   marks: {
-    strong: ({children}: any) => <strong className="text-white font-semibold">{children}</strong>,
-    em: ({children}: any) => <em className="text-electric-300 italic">{children}</em>,
+    strong: ({children}: any) => (
+      <strong className="text-white font-semibold">
+        {children}
+      </strong>
+    ),
+    em: ({children}: any) => (
+      <em className="text-electric-300 italic">
+        {children}
+      </em>
+    ),
     code: ({children}: any) => (
       <code className="bg-slate-800 text-electric-300 px-2 py-1 rounded text-sm font-mono">
         {children}
