@@ -38,25 +38,63 @@ function parseMDXToPortableText(mdxContent) {
 
   const generateKey = () => Math.random().toString(36).substring(2, 15);
 
+  // Helper function to parse text with markdown formatting
+  const parseTextWithMarks = (text) => {
+    const children = [];
+    // Split by bold markers while preserving the markers
+    const parts = text.split(/(\*\*[^*]*\*\*)/);
+    
+    parts.forEach(part => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+        // Bold text
+        children.push({
+          _type: 'span',
+          _key: generateKey(),
+          text: part.slice(2, -2),
+          marks: ['strong']
+        });
+      } else if (part.trim()) {
+        // Regular text
+        children.push({
+          _type: 'span',
+          _key: generateKey(),
+          text: part,
+          marks: []
+        });
+      }
+    });
+    
+    return children.length > 0 ? children : [{
+      _type: 'span',
+      _key: generateKey(),
+      text: text,
+      marks: []
+    }];
+  };
+
   const finishCurrentBlock = () => {
     if (currentBlock) {
       blocks.push(currentBlock);
       currentBlock = null;
     }
     if (listItems.length > 0) {
-      blocks.push({
-        _type: 'block',
-        _key: generateKey(),
-        style: 'normal',
-        markDefs: [],
-        children: [
-          {
-            _type: 'span',
-            _key: generateKey(),
-            text: listItems.join('\n'),
-            marks: []
-          }
-        ]
+      // Create separate block for each list item to handle bold formatting
+      listItems.forEach(item => {
+        blocks.push({
+          _type: 'block',
+          _key: generateKey(),
+          style: 'normal',
+          markDefs: [],
+          children: [
+            {
+              _type: 'span',
+              _key: generateKey(),
+              text: '• ',
+              marks: []
+            },
+            ...parseTextWithMarks(item)
+          ]
+        });
       });
       listItems = [];
     }
@@ -78,7 +116,7 @@ function parseMDXToPortableText(mdxContent) {
       } else {
         // End code block
         blocks.push({
-          _type: 'code',
+          _type: 'codeBlock',
           _key: generateKey(),
           language: codeBlockLanguage,
           code: codeBlockContent.join('\n')
@@ -111,14 +149,7 @@ function parseMDXToPortableText(mdxContent) {
         _key: generateKey(),
         style: style,
         markDefs: [],
-        children: [
-          {
-            _type: 'span',
-            _key: generateKey(),
-            text: text,
-            marks: []
-          }
-        ]
+        children: parseTextWithMarks(text)
       });
       continue;
     }
@@ -126,45 +157,10 @@ function parseMDXToPortableText(mdxContent) {
     // Handle list items
     if (line.startsWith('- ') || line.startsWith('* ') || /^\d+\./.test(line)) {
       const text = line.replace(/^[-*\d\.]\s*/, '');
-      listItems.push(`• ${text}`);
+      listItems.push(text);
       continue;
     }
 
-    // Handle bold text within paragraphs
-    if (line.includes('**')) {
-      finishCurrentBlock();
-      const children = [];
-      const parts = line.split(/(\*\*[^*]+\*\*)/);
-      
-      parts.forEach(part => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          children.push({
-            _type: 'span',
-            _key: generateKey(),
-            text: part.slice(2, -2),
-            marks: ['strong']
-          });
-        } else if (part.trim()) {
-          children.push({
-            _type: 'span',
-            _key: generateKey(),
-            text: part,
-            marks: []
-          });
-        }
-      });
-
-      if (children.length > 0) {
-        blocks.push({
-          _type: 'block',
-          _key: generateKey(),
-          style: 'normal',
-          markDefs: [],
-          children: children
-        });
-      }
-      continue;
-    }
 
     // Handle horizontal rules
     if (line === '---') {
@@ -180,14 +176,7 @@ function parseMDXToPortableText(mdxContent) {
         _key: generateKey(),
         style: 'normal',
         markDefs: [],
-        children: [
-          {
-            _type: 'span',
-            _key: generateKey(),
-            text: line,
-            marks: []
-          }
-        ]
+        children: parseTextWithMarks(line)
       });
     }
   }
@@ -263,8 +252,9 @@ async function migrateMDXLesson() {
   try {
     console.log('🚀 Starting MDX to Sanity migration...');
 
-    // Read the MDX file
-    const mdxPath = path.join(__dirname, '../content/courses/grid-fundamentals/lessons/01-introduction.mdx');
+    // Read the MDX file (configurable)
+    const lessonFile = process.argv[2] || '../content/courses/grid-fundamentals/lessons/02-power-generation-technologies.mdx';
+    const mdxPath = path.join(__dirname, lessonFile);
     
     if (!fs.existsSync(mdxPath)) {
       throw new Error(`MDX file not found at: ${mdxPath}`);
@@ -275,7 +265,14 @@ async function migrateMDXLesson() {
 
     // Extract the title (first h1)
     const titleMatch = mdxContent.match(/^# (.+)$/m);
-    const title = titleMatch ? titleMatch[1] : 'Introduction to Electrical Power Systems';
+    const title = titleMatch ? titleMatch[1] : 'Untitled Lesson';
+    
+    // Generate slug from title
+    const slug = title.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
 
     // Parse content
     const contentBlocks = parseMDXToPortableText(mdxContent);
@@ -423,37 +420,77 @@ async function migrateMDXLesson() {
     // Create the lesson
     console.log('📝 Creating lesson document...');
     
-    const lesson = await client.create({
-      _type: 'lesson',
-      title: title,
-      slug: { current: 'introduction-to-electrical-power-systems' },
-      course: { _type: 'reference', _ref: courseId },
-      orderIndex: 1,
-      description: 'Learn the basic components of electrical power systems and how electricity flows from generation to consumption.',
-      content: contentBlocks,
-      estimatedDuration: 25,
-      learningObjectives: learningObjectives,
-      keyTerms: keyTerms,
-      hasQuiz: true,
-      hasSimulation: false,
-      isPublished: true,
-      publishedAt: new Date().toISOString(),
-      seo: {
-        metaTitle: 'Introduction to Electrical Power Systems | ExaWatt',
-        metaDescription: 'Learn power system basics: generation, transmission, distribution. Understand how electricity flows from power plants to your home.',
-        keywords: ['power systems', 'electricity generation', 'electrical grid'],
-        structuredData: {
-          type: 'LearningResource',
-          educationalLevel: 'Beginner',
-          timeRequired: 'PT25M'
+    // Extract description from first paragraph after title
+    const descriptionMatch = mdxContent.match(/^# .+\n\n(.+?)(?:\n\n|$)/m);
+    const description = descriptionMatch ? descriptionMatch[1] : 'Course lesson covering key concepts.';
+    
+    // Determine order index (look for existing lessons)
+    const existingLessons = await client.fetch(
+      `*[_type == "lesson" && references($courseId)] | order(orderIndex desc) [0]`,
+      { courseId }
+    );
+    const orderIndex = existingLessons ? existingLessons.orderIndex + 1 : 1;
+    
+    // Check if lesson already exists and update instead of create
+    const existingLesson = await client.fetch(
+      `*[_type == "lesson" && slug.current == $slug][0]`,
+      { slug }
+    );
+
+    let lesson;
+    if (existingLesson) {
+      console.log('📝 Updating existing lesson...');
+      lesson = await client
+        .patch(existingLesson._id)
+        .set({
+          title: title,
+          description: description,
+          content: contentBlocks,
+          estimatedDuration: 25,
+          learningObjectives: learningObjectives,
+          keyTerms: keyTerms,
+          hasQuiz: true,
+          hasSimulation: false,
+          isPublished: true,
+          publishedAt: new Date().toISOString(),
+        })
+        .commit();
+    } else {
+      console.log('📝 Creating new lesson...');
+      lesson = await client.create({
+        _type: 'lesson',
+        title: title,
+        slug: { current: slug },
+        course: { _type: 'reference', _ref: courseId },
+        orderIndex: orderIndex,
+        description: description,
+        content: contentBlocks,
+        estimatedDuration: 25,
+        learningObjectives: learningObjectives,
+        keyTerms: keyTerms,
+        hasQuiz: true,
+        hasSimulation: false,
+        isPublished: true,
+        publishedAt: new Date().toISOString(),
+        seo: {
+          metaTitle: 'Introduction to Electrical Power Systems | ExaWatt',
+          metaDescription: 'Learn power system basics: generation, transmission, distribution. Understand how electricity flows from power plants to your home.',
+          keywords: ['power systems', 'electricity generation', 'electrical grid'],
+          structuredData: {
+            type: 'LearningResource',
+            educationalLevel: 'Beginner',
+            timeRequired: 'PT25M'
+          }
         }
-      }
-    });
+      });
+    }
 
     console.log('✅ Successfully migrated MDX lesson to Sanity!');
     console.log(`   - Course ID: ${courseId}`);
     console.log(`   - Lesson ID: ${lesson._id}`);
-    console.log(`   - Lesson URL: /app/courses/grid-fundamentals/lessons/introduction-to-electrical-power-systems`);
+    console.log(`   - Title: ${title}`);
+    console.log(`   - Order: ${orderIndex}`);
+    console.log(`   - Lesson URL: /app/courses/grid-fundamentals/lessons/${slug}`);
 
     return {
       courseId,
