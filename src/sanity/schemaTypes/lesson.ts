@@ -51,6 +51,7 @@ export const lesson = defineType({
       name: 'content',
       title: 'Lesson Content',
       type: 'array',
+      group: 'content',
       of: [
         {
           type: 'block',
@@ -158,17 +159,20 @@ export const lesson = defineType({
       title: 'Estimated Duration (minutes)',
       type: 'number',
       validation: (rule) => rule.min(1).max(240),
+      group: 'content',
     }),
     defineField({
       name: 'learningObjectives',
       title: 'Learning Objectives',
       type: 'array',
       of: [{ type: 'string' }],
+      group: 'content',
     }),
     defineField({
       name: 'keyTerms',
       title: 'Key Terms',
       type: 'array',
+      group: 'content',
       of: [
         {
           type: 'object',
